@@ -1,0 +1,17 @@
+{
+  "extends": "@diplodoc/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2019", "DOM"],
+    "target": "es6",
+    "baseUrl": ".",
+    "rootDir": "src",
+    "outDir": "lib/",
+    "module": "CommonJS",
+    "paths": {
+      "src/*": ["src/*"],
+      "__tests__/*": ["__tests__/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "src/playground.ts"]
+}
