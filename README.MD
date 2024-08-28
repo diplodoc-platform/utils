@@ -10,6 +10,8 @@ The Diplodoc ecosystem consists of many packages that have similar problems and 
 
 ## Table of contents
 
+- [AttrsParser](#AttrsParser)
+
 ### AttrsParser 
 
 ### Purpose
@@ -21,7 +23,7 @@ Support [markdown-it-attrs](https://github.com/arve0/markdown-it-attrs)-like att
 ```typescript
     /* 
         optional first query
-        if provided parser will parse it imminently
+        if provided parser will parse it immediately
         each 'parse' call is pure
     */
     const attrs = new AttrsParser('{.class #id data-name=diplodoc}');
@@ -30,6 +32,6 @@ Support [markdown-it-attrs](https://github.com/arve0/markdown-it-attrs)-like att
 
     const other = attrs.parse('{data-wide title="Support quotes too"}')
 
-    other /* { attr: ['data-wide'], title: ['Support quotes too'] }
+    other /* { attr: ['data-wide'], title: ['Support quotes too'] } */
 ```
 

@@ -1,5 +1,3 @@
 import {AttrsParser} from './attrs';
 
-export {
-  AttrsParser
-}
+export {AttrsParser};
