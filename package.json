@@ -26,7 +26,8 @@
     "lint": "lint update && lint",
     "lint:fix": "lint update && lint fix",
     "pre-commit": "lint update && lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "typecheck": "tsc --noEmit"
   },
   "license": "MIT",
   "devDependencies": {
