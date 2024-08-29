@@ -1,4 +1,4 @@
-import {AttrsParser} from '../attrs';
+import {AttrsParser} from '../src';
 
 describe('attrs parser tests', () => {
     it('parses classes and ids', () => {

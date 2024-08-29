@@ -4,14 +4,14 @@
     "lib": ["ES2019", "DOM"],
     "target": "es6",
     "baseUrl": ".",
-    "rootDir": "src",
+    "rootDir": "src", 
     "outDir": "lib/",
     "module": "CommonJS",
     "paths": {
       "src/*": ["src/*"],
-      "__tests__/*": ["__tests__/*"]
+      "tests/*": ["tests/*"]
     }
   },
   "include": ["src"],
-  "exclude": ["node_modules", "src/playground.ts"]
+  "exclude": ["node_modules"]
 }

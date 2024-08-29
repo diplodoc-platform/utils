@@ -1,3 +1,3 @@
-import {AttrsParser} from './attrs';
+import {AttrsParser} from './lib/attrs';
 
 export {AttrsParser};
