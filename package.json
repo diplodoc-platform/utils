@@ -13,15 +13,26 @@
   ],
   "main": "./lib/index.js",
   "types": "./lib/index.d.js",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./react": {
+      "types": "./react/index.d.ts",
+      "default": "./react/index.js"
+    }
+  },
   "files": [
-    "lib/"
+    "lib/",
+    "react/"
   ],
   "scripts": {
     "test": "jest --coverage --verbose --silent=false",
     "test:watch": "jest --watch --verbose --silent=false",
     "build": "npm run build:clean && npm run build:code",
-    "build:code": "tsc -p tsconfig.types.json && node scripts/bundle.js",
-    "build:clean": "rm -rf lib",
+    "build:code": "tsc -p tsconfig.build.json && node scripts/bundle.js",
+    "build:clean": "rm -rf lib && rm -rf react",
     "prepublishOnly": "npm run build",
     "lint": "lint",
     "lint:fix": "lint fix",
@@ -38,10 +49,20 @@
     "@types/jest": "^27.5.2",
     "@types/markdown-it": "12.2.3",
     "@types/node": "^17.0.35",
+    "@types/react": "^18.3.5",
     "esbuild": "^0.17.18",
     "esbuild-jest": "^0.5.0",
     "esbuild-node-externals": "^1.7.0",
     "jest": "^28.1.0",
+    "react": "^18.3.1",
     "typescript": "^5.0.4"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0  || ^17.0.0 || ^18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
   }
 }
