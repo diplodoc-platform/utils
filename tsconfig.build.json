@@ -4,10 +4,12 @@
     "lib": ["ES2019", "DOM"],
     "target": "es6",
     "module": "CommonJS",
-    "rootDirs": ["src", "tests"],
+    "rootDir": "src",
     "outDir": "./",
-    "jsx": "react"
+    "jsx": "react",
+    "declaration": true,
+    "emitDeclarationOnly": true
   },
-  "include": ["src", "tests"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }
