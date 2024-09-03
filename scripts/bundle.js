@@ -1,32 +1,18 @@
-const {build} = require('esbuild');
+const esbuild = require('esbuild');
 const {TsconfigPathsPlugin} = require('@esbuild-plugins/tsconfig-paths');
 const {nodeExternalsPlugin} = require('esbuild-node-externals');
 
-const common = {
-    bundle: true,
-    sourcemap: true,
-    tsconfig: './tsconfig.build.json',
-};
-
-build({
+esbuild.build({
+    tsconfig: './tsconfig.json',
     entryPoints: ['src/lib/index.ts'],
     packages: 'external',
-    outfile: 'lib/index.js',
-    platform: 'node',
-    target: 'node14',
+    outdir: 'lib',
+    platform: 'neutral',
+    target: 'es6',
+    bundle: true,
     plugins: [
         // eslint-disable-next-line new-cap
-        TsconfigPathsPlugin({tsconfig: './tsconfig.build.json'}),
+        TsconfigPathsPlugin({tsconfig: './tsconfig.json'}),
         nodeExternalsPlugin(),
     ],
-});
-
-build({
-    ...common,
-    entryPoints: ['src/react/index.ts'],
-    outfile: 'react/index.js',
-    platform: 'neutral',
-    external: ['react'],
-    target: 'es6',
-    format: 'cjs',
 });

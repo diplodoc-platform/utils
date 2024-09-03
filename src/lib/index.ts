@@ -8,8 +8,17 @@ import {
     getScriptStore,
     handleQueueCreated,
     isBrowser,
+    useController,
 } from './extension-load-queue';
 
-export {AttrsParser, createLoadQueue, getQueueStore, getScriptStore, handleQueueCreated, isBrowser};
+export {
+    AttrsParser,
+    createLoadQueue,
+    getQueueStore,
+    getScriptStore,
+    handleQueueCreated,
+    isBrowser,
+    useController,
+};
 
 export type {ControllerLoadedCallback, CreateLoadQueueArgs, ScriptStore};

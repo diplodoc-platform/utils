@@ -17,22 +17,17 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
-    },
-    "./react": {
-      "types": "./react/index.d.ts",
-      "default": "./react/index.js"
     }
   },
   "files": [
-    "lib/",
-    "react/"
+    "lib/"
   ],
   "scripts": {
     "test": "jest --coverage --verbose --silent=false",
     "test:watch": "jest --watch --verbose --silent=false",
     "build": "npm run build:clean && npm run build:code",
     "build:code": "tsc -p tsconfig.build.json && node scripts/bundle.js",
-    "build:clean": "rm -rf lib && rm -rf react",
+    "build:clean": "rm -rf lib",
     "prepublishOnly": "npm run build",
     "lint": "lint",
     "lint:fix": "lint fix",

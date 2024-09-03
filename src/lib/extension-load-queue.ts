@@ -1,11 +1,18 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type BrowserWindow = any;
+import {useEffect, useState} from 'react';
+
+declare global {
+    interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [key: symbol]: any;
+        QUEUE_SYMBOL: boolean;
+    }
+}
 
 export type ControllerLoadedCallback<T> = (controller: T) => void;
 
-export const QUEUE_SYMBOL: unique symbol = Symbol.for('queue');
+export const QUEUE_SYMBOL = Symbol.for('queue');
 
-export type ScriptStore<T> = ControllerLoadedCallback<T>[] | null;
+export type ScriptStore<T> = ControllerLoadedCallback<T>[];
 
 export interface CreateLoadQueueArgs<T> {
     store: ScriptStore<T>;
@@ -14,28 +21,30 @@ export interface CreateLoadQueueArgs<T> {
     onQueueCreated?: (created: boolean) => void;
 }
 
+// TODO: this function is a very frequently used utility,
+//  so we should place it in a separate top-level file and document it.
 export const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
 export const getScriptStore = <T>(key: symbol): ScriptStore<T> => {
     if (isBrowser()) {
-        (window as BrowserWindow)[key] = (window as BrowserWindow)[key] || [];
-        return (window as BrowserWindow)[key];
+        (window as Window)[key] = (window as Window)[key] || [];
+        return (window as Window)[key];
+    } else {
+        throw new Error('This functionality should be employed on the client-side.');
     }
-
-    return null;
 };
 
 export const getQueueStore = () => {
     if (isBrowser()) {
-        (window as BrowserWindow)[QUEUE_SYMBOL] = (window as BrowserWindow)[QUEUE_SYMBOL] || false;
-        return (window as BrowserWindow)[QUEUE_SYMBOL];
+        (window as Window)[QUEUE_SYMBOL] = (window as Window)[QUEUE_SYMBOL] || false;
+        return (window as Window)[QUEUE_SYMBOL];
     }
 
     return null;
 };
 
 export const handleQueueCreated = (created: boolean) => {
-    (window as BrowserWindow)[QUEUE_SYMBOL] = created;
+    (window as Window)[QUEUE_SYMBOL] = created;
 };
 
 export const createLoadQueue = <T>({
@@ -84,3 +93,26 @@ export const createLoadQueue = <T>({
 
     unqueue();
 };
+
+const noop = () => {};
+
+export function useController<T>(store: ScriptStore<T>) {
+    const [controller, setController] = useState<T | null>(null);
+
+    useEffect(() => {
+        if (store) {
+            store.push(setController);
+
+            return () => {
+                const index = store.indexOf(setController);
+                if (index > -1) {
+                    store.splice(index, 1);
+                }
+            };
+        }
+
+        return noop;
+    }, []);
+
+    return controller;
+}
