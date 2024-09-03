@@ -1,13 +1,5 @@
 import {useEffect, useState} from 'react';
 
-declare global {
-    interface Window {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key: symbol]: any;
-        QUEUE_SYMBOL: boolean;
-    }
-}
-
 export type ControllerLoadedCallback<T> = (controller: T) => void;
 
 export const QUEUE_SYMBOL = Symbol.for('queue');
@@ -25,6 +17,7 @@ export interface CreateLoadQueueArgs<T> {
 //  so we should place it in a separate top-level file and document it.
 export const isBrowser = () => typeof window !== 'undefined' && typeof document !== 'undefined';
 
+// TODO: window casts are weird — fix encounter any issues with declaration merging
 export const getScriptStore = <T>(key: symbol): ScriptStore<T> => {
     if (isBrowser()) {
         (window as Window)[key] = (window as Window)[key] || [];
@@ -115,4 +108,12 @@ export function useController<T>(store: ScriptStore<T>) {
     }, []);
 
     return controller;
+}
+
+declare global {
+    interface Window {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        [key: symbol]: any; // TODO: sub-optimal, fix any
+        QUEUE_SYMBOL: boolean;
+    }
 }
