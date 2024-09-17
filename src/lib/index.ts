@@ -3,20 +3,20 @@ import {
     ControllerLoadedCallback,
     CreateLoadQueueArgs,
     ScriptStore,
+    createHandleQueueCreated,
     createLoadQueue,
     getQueueStore,
     getScriptStore,
-    handleQueueCreated,
-    isBrowser,
     useController,
 } from './extension-load-queue';
+import {isBrowser} from './browser';
 
 export {
     AttrsParser,
     createLoadQueue,
     getQueueStore,
     getScriptStore,
-    handleQueueCreated,
+    createHandleQueueCreated,
     isBrowser,
     useController,
 };
