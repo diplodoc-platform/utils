@@ -35,21 +35,43 @@ export type ScriptStore<T> = ControllerLoadedCallback<T>[];
 
 /**
  * Interface for creating a load queue.
+ *
+ * @template T - Type of the controller created in the queue.
  */
 export interface CreateLoadQueueArgs<T> {
-    // The store where callbacks are saved
+    /**
+     * The store where callbacks are saved.
+     *
+     * @type {ScriptStore<T>}
+     */
     store: ScriptStore<T>;
 
-    // Function that creates a controller
+    /**
+     * Function that creates a controller.
+     *
+     * @returns {T} A new controller instance.
+     */
     createController: () => T;
 
-    // Flag to check if the queue is already created
+    /**
+     * Flag to check if the queue is already created.
+     *
+     * @type {boolean} [isQueueCreated]
+     */
     isQueueCreated?: boolean;
 
-    // Callback to handle queue creation
+    /**
+     * Callback to handle queue creation.
+     *
+     * @param {boolean} created - Indicates if the queue was successfully created.
+     */
     onQueueCreated?: (created: boolean) => void;
 
-    // Symbol key for identifying the queue
+    /**
+     * Symbol key for identifying the queue.
+     *
+     * @type {symbol} [queueKey]
+     */
     queueKey?: symbol;
 }
 
@@ -70,7 +92,7 @@ export const getScriptStore = <T>(storeKey: symbol): ScriptStore<T> => {
 
         return window[storeKey] as ScriptStore<T>;
     } else {
-        throw new Error('This functionality should be employed on the client-side.');
+        throw new Error('Cannot initialize QueueStore in a non-browser environment.');
     }
 };
 
@@ -85,7 +107,7 @@ const ensureQueuesSymbolInitialized = (): void => {
             window[QUEUES_SYMBOL] = {};
         }
     } else {
-        throw new Error('This functionality should be employed on the client-side.');
+        throw new Error('Cannot initialize QueueStore in a non-browser environment.');
     }
 };
 
@@ -107,7 +129,7 @@ export const getQueueStore = (queueKey: symbol): boolean => {
  * @returns {function(boolean): void} A function that takes a boolean `created`
  * and marks the queue as created.
  */
-export const createHandleQueueCreated = (queueKey: symbol): ((created: boolean) => void) => {
+const createHandleQueueCreated = (queueKey: symbol): ((created: boolean) => void) => {
     ensureQueuesSymbolInitialized();
     return (created: boolean) => {
         window[QUEUES_SYMBOL][queueKey] = created;
@@ -178,13 +200,6 @@ export const createLoadQueue = <T>({
 };
 
 /**
- * A no-operation function used as a default cleanup function.
- *
- * @returns {void}
- */
-const noop = (): void => {};
-
-/**
  * React hook to manage and use a controller with a script store.
  *
  * @param {ScriptStore<T>} store - The store where the controller is managed.
@@ -194,22 +209,15 @@ export function useController<T>(store: ScriptStore<T>): T | null {
     const [controller, setController] = useState<T | null>(null);
 
     useEffect(() => {
-        if (store) {
-            store.push(setController); // Add setController to the store
+        store.push(setController); // Add setController to the store
 
-            return () => {
-                const index = store.indexOf(setController);
-                if (index > -1) {
-                    // Remove setController when unmounting
-                    store.splice(index, 1);
-                }
-            };
-        } else {
-            // eslint-disable-next-line no-console
-            console.warn('Store is not provided to useController'); // Replace console.warn with a logging function if necessary
-        }
-
-        return noop;
+        return () => {
+            const index = store.indexOf(setController);
+            if (index > -1) {
+                // Remove setController when unmounting
+                store.splice(index, 1);
+            }
+        };
     }, []);
 
     return controller;
