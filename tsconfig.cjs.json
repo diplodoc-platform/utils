@@ -1,0 +1,15 @@
+{
+  "extends": "@diplodoc/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2019", "DOM"],
+    "target": "es6",
+    "module": "CommonJS",
+    "rootDir": "src/lib",
+    "outDir": "./build/cjs",
+    "jsx": "react",
+    "declaration": true,
+    "emitDeclarationOnly": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
