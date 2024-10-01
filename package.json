@@ -1,6 +1,6 @@
 {
   "name": "@diplodoc/utils",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Diplodoc cross-packages utils",
   "homepage": "https://github.com/diplodoc-platform/utils",
   "bugs": {
