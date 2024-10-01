@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/diplodoc-platform/utils/compare/v1.2.0...v1.2.1) (2024-10-01)
+
+
+### Bug Fixes
+
+* types field ([a459a9e](https://github.com/diplodoc-platform/utils/commit/a459a9e372e051d8e9e31d0ba6ece754cb8ab51a))
+
 ## [1.2.0](https://github.com/diplodoc-platform/utils/compare/v1.1.0...v1.2.0) (2024-10-01)
 
 ### Features
