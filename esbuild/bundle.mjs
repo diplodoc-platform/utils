@@ -5,7 +5,6 @@ import {nodeExternalsPlugin} from 'esbuild-node-externals';
 /** @type {import('esbuild').BuildOptions}*/
 const commonConfig = {
     tsconfig: './tsconfig.json',
-    entryPoints: ['src/lib/index.ts'],
     packages: 'external',
     platform: 'neutral',
     bundle: true,
@@ -16,16 +15,22 @@ const commonConfig = {
     ],
 };
 
-const esmConfig = {
+const esmConfig = (module) => ({
     ...commonConfig,
-    outdir: 'build/esm',
+    entryPoints: [`src/lib/${module}/index.ts`],
+    outdir: `build/esm/${module}`,
     format: 'esm',
-};
+});
 
-const cjsConfig = {
+const cjsConfig = (module) => ({
     ...commonConfig,
-    outdir: 'build/cjs',
+    entryPoints: [`src/lib/${module}/index.ts`],
+    outdir: `build/cjs/${module}`,
     format: 'cjs',
-};
+});
 
-Promise.all([esmConfig, cjsConfig].map(build));
+Promise.all(
+    [esmConfig(['common']), esmConfig(['react']), cjsConfig(['common']), cjsConfig(['react'])].map(
+        build,
+    ),
+);
