@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/diplodoc-platform/utils/compare/v2.0.0...v2.0.1) (2025-01-29)
+
+
+### Bug Fixes
+
+* add types to exports ([2b2d0dd](https://github.com/diplodoc-platform/utils/commit/2b2d0dd3b3ad901cc955aa0ab26eaf2c63f5801a))
+
 ## [2.0.0](https://github.com/diplodoc-platform/utils/compare/v1.2.1...v2.0.0) (2025-01-29)
 
 ### ⚠ BREAKING CHANGES
