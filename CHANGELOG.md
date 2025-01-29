@@ -1,11 +1,22 @@
 # Changelog
 
-## [1.2.1](https://github.com/diplodoc-platform/utils/compare/v1.2.0...v1.2.1) (2024-10-01)
+## [2.0.0](https://github.com/diplodoc-platform/utils/compare/v1.2.1...v2.0.0) (2025-01-29)
 
+### ⚠ BREAKING CHANGES
+
+- Extract react utils to isolated lib.
+  In the latest major release, we've reorganized our libraries for better modularity.
+  Now, to import the useController function, you should use `import { useController } from '@diplodoc/utils/react';` instead of the previous `import { useController } from '@diplodoc/utils';`.
+
+### Features
+
+- Extract react utils to isolated lib ([ca70b94](https://github.com/diplodoc-platform/utils/commit/ca70b94a08129b017086bb7bae247ce80403e1b3))
+
+## [1.2.1](https://github.com/diplodoc-platform/utils/compare/v1.2.0...v1.2.1) (2024-10-01)
 
 ### Bug Fixes
 
-* types field ([a459a9e](https://github.com/diplodoc-platform/utils/commit/a459a9e372e051d8e9e31d0ba6ece754cb8ab51a))
+- types field ([a459a9e](https://github.com/diplodoc-platform/utils/commit/a459a9e372e051d8e9e31d0ba6ece754cb8ab51a))
 
 ## [1.2.0](https://github.com/diplodoc-platform/utils/compare/v1.1.0...v1.2.0) (2024-10-01)
 
