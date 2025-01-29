@@ -11,17 +11,19 @@
     "markdown",
     "utils"
   ],
-  "types": "./build/cjs/index.d.ts",
+  "types": "./build/esm/common/index.d.ts",
   "exports": {
     ".": {
       "import": "./build/esm/common/index.js",
       "require": "./build/cjs/common/index.js",
-      "default": "./build/esm/common/index.js"
+      "default": "./build/esm/common/index.js",
+      "types": "./build/esm/common/index.d.ts"
     },
     "./react": {
       "import": "./build/esm/react/index.js",
       "require": "./build/cjs/react/index.js",
-      "default": "./build/esm/react/index.js"
+      "default": "./build/esm/react/index.js",
+      "types": "./build/esm/react/index.d.ts"
     }
   },
   "files": [
