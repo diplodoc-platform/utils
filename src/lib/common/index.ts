@@ -6,6 +6,8 @@ export type {
 
 export {AttrsParser} from './attrs';
 
+export {parseMdAttrs} from './parse-md-attrs';
+
 export {createLoadQueue, getQueueStore, getScriptStore} from './extension-load-queue';
 
 export {isBrowser} from './browser';
