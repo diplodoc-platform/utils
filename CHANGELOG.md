@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/diplodoc-platform/utils/compare/v2.0.1...v2.1.0) (2025-03-21)
+
+
+### Features
+
+* added attributes parser for markdown-it plugins ([7f2bceb](https://github.com/diplodoc-platform/utils/commit/7f2bceb547edb63a2028a040eaccea63ab918fd2))
+* allow react 19 in deps ([9fa3a2e](https://github.com/diplodoc-platform/utils/commit/9fa3a2e22a95ff692bec6485fc238175148053b9))
+
 ## [2.0.1](https://github.com/diplodoc-platform/utils/compare/v2.0.0...v2.0.1) (2025-01-29)
 
 
