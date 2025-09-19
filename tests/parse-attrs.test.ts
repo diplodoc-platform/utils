@@ -1,6 +1,8 @@
+import type {ParseMdAttrsResult} from '../src/lib/common/parse-md-attrs';
+
 import MarkdownIt from 'markdown-it';
 
-import {ParseMdAttrsResult, parseMdAttrs} from '../src/lib/common/parse-md-attrs';
+import {parseMdAttrs} from '../src/lib/common/parse-md-attrs';
 
 const md = new MarkdownIt('zero');
 
