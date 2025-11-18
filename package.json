@@ -3,6 +3,10 @@
   "version": "2.1.0",
   "description": "Diplodoc cross-packages utils",
   "homepage": "https://github.com/diplodoc-platform/utils",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:diplodoc-platform/utils.git"
+  },
   "bugs": {
     "url": "https://github.com/diplodoc-platform/utils/issues"
   },
