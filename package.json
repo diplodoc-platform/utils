@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git@github.com:diplodoc-platform/utils.git"
   },
+  "engines": {
+    "npm": ">=11.5.1"
+  },
   "bugs": {
     "url": "https://github.com/diplodoc-platform/utils/issues"
   },
