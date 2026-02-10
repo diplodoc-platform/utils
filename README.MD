@@ -1,6 +1,11 @@
 # Diplodoc utils
 
 [![NPM version](https://img.shields.io/npm/v/@diplodoc/utils.svg?style=flat)](https://www.npmjs.org/package/@diplodoc/utils)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_utils&metric=alert_status)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_utils)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_utils&metric=coverage)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_utils)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_utils&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_utils)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_utils&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_utils)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=diplodoc-platform_utils&metric=security_rating)](https://sonarcloud.io/summary/overall?id=diplodoc-platform_utils)
 
 Diplodoc cross-packages utils.
 
