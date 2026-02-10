@@ -1,6 +1,7 @@
 import type {ParseMdAttrsResult} from '../src/lib/common/parse-md-attrs';
 
 import MarkdownIt from 'markdown-it';
+import {describe, expect, it} from 'vitest';
 
 import {parseMdAttrs} from '../src/lib/common/parse-md-attrs';
 

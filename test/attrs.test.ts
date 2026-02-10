@@ -1,3 +1,5 @@
+import {describe, expect, it} from 'vitest';
+
 import {AttrsParser} from '../src/lib/common';
 
 describe('attrs parser tests', () => {
