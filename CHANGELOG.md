@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.2.0](https://github.com/diplodoc-platform/utils/compare/v2.1.0...v2.2.0) (2026-03-26)
+
+
+### Features
+
+* Universal generateID method DOCSTOOLS-5561 ([f105a20](https://github.com/diplodoc-platform/utils/commit/f105a20020e5015a2117b336a8de31ace0a49f81))
+
+
+### Bug Fixes
+
+* Update infra to v1.13.2 ([30430cc](https://github.com/diplodoc-platform/utils/commit/30430ccdc8c4b917c95f47ddde2a4fd3e261afb6))
+
 ## [2.1.0](https://github.com/diplodoc-platform/utils/compare/v2.0.1...v2.1.0) (2025-03-21)
 
 
