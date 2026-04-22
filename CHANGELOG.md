@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/diplodoc-platform/utils/compare/v2.2.0...v2.2.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* add generator strategy DOCSTOOLS-5561 ([c0a9a72](https://github.com/diplodoc-platform/utils/commit/c0a9a72a9d27320e7b657b40b9275de50029e6a5))
+
 ## [2.2.0](https://github.com/diplodoc-platform/utils/compare/v2.1.0...v2.2.0) (2026-03-26)
 
 
