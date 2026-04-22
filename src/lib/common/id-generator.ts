@@ -61,6 +61,12 @@ export function createIDGeneratorByStrategy(strategy: IDGeneratorStrategy = 'ran
             return () => '1';
         case 'random':
         default:
-            return () => Math.random().toString(36).substr(2, 8);
+            return (prefix?: string) => {
+                if (!prefix) {
+                    return Math.random().toString(36).substr(2, 8);
+                }
+
+                return `${prefix}-${Math.random().toString(36).substr(2, 8)}`;
+            };
     }
 }
