@@ -5,6 +5,14 @@
 export type IDGenerator = (prefix?: string) => string;
 
 /**
+ * Strategy for generating element IDs (tabs, terms, code blocks, etc.).
+ * - `'random'` (default): uses `Math.random()` — legacy behavior, non-deterministic.
+ * - `'deterministic'`: uses per-file counters with prefix (e.g. `'term-1'`).
+ * - `'constant'`: always returns `'1'` — eliminates ID noise when diffing build outputs.
+ */
+export type IDGeneratorStrategy = 'random' | 'deterministic' | 'constant';
+
+/**
  * Creates an isolated ID generator with its own counter per prefix.
  * Call once per file/document to ensure IDs start from 1 for each file.
  *
@@ -28,4 +36,31 @@ export function createIDGenerator(): IDGenerator {
 
         return `${prefix}-${counters.get(prefix)}`;
     };
+}
+
+/**
+ * Factory that creates an {@link IDGenerator} based on the chosen strategy.
+ *
+ * @param strategy - The ID generation strategy to use.
+ * @returns An {@link IDGenerator} function for the selected strategy.
+ *
+ * @example
+ * // In CLI or any consumer:
+ * const generateID = createIDGeneratorByStrategy('deterministic');
+ * // Pass to transform options — plugins will use it instead of random IDs
+ *
+ * @example
+ * const generateID = createIDGeneratorByStrategy('random');
+ * // Returns a generator with legacy random behavior
+ */
+export function createIDGeneratorByStrategy(strategy: IDGeneratorStrategy = 'random'): IDGenerator {
+    switch (strategy) {
+        case 'deterministic':
+            return createIDGenerator();
+        case 'constant':
+            return () => '1';
+        case 'random':
+        default:
+            return () => Math.random().toString(36).substr(2, 8);
+    }
 }

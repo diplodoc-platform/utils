@@ -4,7 +4,7 @@ export type {
     ScriptStore,
 } from './extension-load-queue';
 
-export type {IDGenerator} from './id-generator';
+export type {IDGenerator, IDGeneratorStrategy} from './id-generator';
 
 export {AttrsParser} from './attrs';
 
@@ -14,4 +14,4 @@ export {createLoadQueue, getQueueStore, getScriptStore} from './extension-load-q
 
 export {isBrowser} from './browser';
 
-export {createIDGenerator} from './id-generator';
+export {createIDGenerator, createIDGeneratorByStrategy} from './id-generator';
