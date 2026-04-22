@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.2](https://github.com/diplodoc-platform/utils/compare/v2.2.1...v2.2.2) (2026-04-22)
+
+
+### Bug Fixes
+
+* extend random mode in generator id ([ab87f0d](https://github.com/diplodoc-platform/utils/commit/ab87f0d5e49d426c6b6d148e8805b4cd6c93257a))
+
 ## [2.2.1](https://github.com/diplodoc-platform/utils/compare/v2.2.0...v2.2.1) (2026-04-22)
 
 
