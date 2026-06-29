@@ -101,6 +101,24 @@ describe('parseYaMake', () => {
         ]);
     });
 
+    it('resolves ${ARCADIA_ROOT} in COPY_FILE src', () => {
+        writeFileSync(
+            yamakePath,
+            'COPY_FILE(${ARCADIA_ROOT}/shared/style.css _assets/style.css)\nEND()',
+        );
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.copyFileSingle[0].src).toBe(join(ROOT, 'shared/style.css'));
+    });
+
+    it('ignores commented-out directives', () => {
+        writeFileSync(
+            yamakePath,
+            '# DOCS_DIR(docs/should/be/ignored)\n## section\nDOCS(html)\nEND()',
+        );
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsDir).toBeUndefined();
+    });
+
     it('returns empty collections when macros are absent', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nEND()');
         const result = parseYaMake(yamakePath, ROOT);
