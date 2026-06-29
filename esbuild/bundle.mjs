@@ -29,8 +29,21 @@ const cjsConfig = (module) => ({
     format: 'cjs',
 });
 
+const yaMakeConfig = (format) => ({
+    ...commonConfig,
+    platform: 'node',
+    entryPoints: ['src/lib/ya-make/index.ts'],
+    outdir: `build/${format}/ya-make`,
+    format,
+});
+
 Promise.all(
-    [esmConfig(['common']), esmConfig(['react']), cjsConfig(['common']), cjsConfig(['react'])].map(
-        build,
-    ),
+    [
+        esmConfig(['common']),
+        esmConfig(['react']),
+        cjsConfig(['common']),
+        cjsConfig(['react']),
+        yaMakeConfig('esm'),
+        yaMakeConfig('cjs'),
+    ].map(build),
 );

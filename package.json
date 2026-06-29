@@ -29,6 +29,11 @@
       "types": "./build/esm/react/index.d.ts",
       "node": "./build/cjs/react/index.js",
       "default": "./build/esm/react/index.js"
+    },
+    "./ya-make": {
+      "types": "./build/esm/ya-make/index.d.ts",
+      "node": "./build/cjs/ya-make/index.js",
+      "default": "./build/esm/ya-make/index.js"
     }
   },
   "files": [
