@@ -37,7 +37,11 @@ function resolveFrom(raw: string, arcadiaRoot: string, curDir: string): string {
 }
 
 export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakeParsed {
-    const content = readFileSync(yamakePath, 'utf8');
+    const raw = readFileSync(yamakePath, 'utf8');
+    const content = raw
+        .split('\n')
+        .filter((line) => !line.trimStart().startsWith('#'))
+        .join('\n');
     const curDir = dirname(yamakePath);
 
     const docsDirMatch = /DOCS_DIR\s*\(\s*([\w/.:-]+)\s*\)/.exec(content);
@@ -88,10 +92,11 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
     const copyFileRegex = /\bCOPY_FILE\s*\(\s*(\S+)\s+(\S+)\s*\)/g;
 
     while ((match = copyFileRegex.exec(content)) !== null) {
-        copyFileSingle.push({
-            src: join(curDir, match[1]),
-            dst: match[2],
-        });
+        const rawSrc = match[1];
+        const src = rawSrc.includes('${')
+            ? resolveFrom(rawSrc, arcadiaRoot, curDir)
+            : join(curDir, rawSrc);
+        copyFileSingle.push({src, dst: match[2]});
     }
 
     return {arcadiaRoot, docsDir, copyFiles, includeSources, peerDirs, copyFileSingle};
