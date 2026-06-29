@@ -132,6 +132,15 @@ export function resolveTarget(
     return null;
 }
 
+function copyFileTo(src: string, dst: string): void {
+    if (!existsSync(src)) {
+        return;
+    }
+
+    mkdirSync(dirname(dst), {recursive: true});
+    copyFileSync(src, dst);
+}
+
 export async function assembleDir(
     assembledDir: string,
     originalInput: string,
@@ -152,44 +161,17 @@ export async function assembleDir(
 
     for (const {from, namespace, files} of parsed.copyFiles) {
         for (const file of files) {
-            const src = join(from, file);
-
-            if (!existsSync(src)) {
-                continue;
-            }
-
-            const dst = join(assembledDir, namespace, file);
-
-            mkdirSync(dirname(dst), {recursive: true});
-            copyFileSync(src, dst);
+            copyFileTo(join(from, file), join(assembledDir, namespace, file));
         }
     }
 
     for (const src of parsed.includeSources) {
-        if (!existsSync(src)) {
-            continue;
-        }
-
-        const dst = join(assembledDir, relative(parsed.arcadiaRoot, src));
-
-        mkdirSync(dirname(dst), {recursive: true});
-        copyFileSync(src, dst);
+        copyFileTo(src, join(assembledDir, relative(parsed.arcadiaRoot, src)));
     }
 
     for (const {src, dst} of parsed.copyFileSingle) {
-        if (!existsSync(src)) {
-            continue;
-        }
-
-        const dstPath = join(assembledDir, dst);
-
-        mkdirSync(dirname(dstPath), {recursive: true});
-        copyFileSync(src, dstPath);
+        copyFileTo(src, join(assembledDir, dst));
     }
 
-    const yfmSrc = join(originalInput, '.yfm');
-
-    if (existsSync(yfmSrc)) {
-        copyFileSync(yfmSrc, join(assembledDir, '.yfm'));
-    }
+    copyFileTo(join(originalInput, '.yfm'), join(assembledDir, '.yfm'));
 }
