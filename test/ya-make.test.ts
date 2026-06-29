@@ -14,6 +14,8 @@ const makeParsed = (overrides: Partial<YaMakeParsed> = {}): YaMakeParsed => ({
     docsDir: undefined,
     copyFiles: [],
     includeSources: [],
+    peerDirs: [],
+    copyFileSingle: [],
     ...overrides,
 });
 
@@ -82,12 +84,31 @@ describe('parseYaMake', () => {
         ]);
     });
 
+    it('parses PEERDIR', () => {
+        writeFileSync(yamakePath, 'PEERDIR(\n    docs/shared/lib\n    docs/common/icons\n)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.peerDirs).toEqual([
+            join(ROOT, 'docs/shared/lib'),
+            join(ROOT, 'docs/common/icons'),
+        ]);
+    });
+
+    it('parses COPY_FILE relative to ya.make directory', () => {
+        writeFileSync(yamakePath, 'COPY_FILE(assets/logo.png ru/logo.png)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.copyFileSingle).toEqual([
+            {src: join(dir, 'assets/logo.png'), dst: 'ru/logo.png'},
+        ]);
+    });
+
     it('returns empty collections when macros are absent', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nEND()');
         const result = parseYaMake(yamakePath, ROOT);
         expect(result.docsDir).toBeUndefined();
         expect(result.copyFiles).toHaveLength(0);
         expect(result.includeSources).toHaveLength(0);
+        expect(result.peerDirs).toHaveLength(0);
+        expect(result.copyFileSingle).toHaveLength(0);
     });
 });
 
@@ -121,6 +142,20 @@ describe('resolveTarget', () => {
             copyFiles: [{from: `${ROOT}/devops/ru`, namespace: 'ru', files: ['feedback.md']}],
         });
         expect(resolveTarget(`${ROOT}/devops/ru/other.md`, parsed, assembled)).toBeNull();
+    });
+
+    it('maps PEERDIR file to assembledDir root', () => {
+        const parsed = makeParsed({peerDirs: [`${ROOT}/docs/shared`]});
+        const result = resolveTarget(`${ROOT}/docs/shared/ru/index.md`, parsed, assembled);
+        expect(result).toBe(join(assembled, 'ru/index.md'));
+    });
+
+    it('maps COPY_FILE src to its declared dst', () => {
+        const parsed = makeParsed({
+            copyFileSingle: [{src: `${ROOT}/assets/logo.png`, dst: 'ru/logo.png'}],
+        });
+        const result = resolveTarget(`${ROOT}/assets/logo.png`, parsed, assembled);
+        expect(result).toBe(join(assembled, 'ru/logo.png'));
     });
 
     it('returns null for unrelated path', () => {
@@ -203,6 +238,31 @@ describe('assembleDir', () => {
         await assembleDir(out, tmp, parsed);
 
         expect(existsSync(join(out, 'ru/missing.md'))).toBe(false);
+    });
+
+    it('merges PEERDIR contents into assembledDir root', async () => {
+        const peerDir = join(tmp, 'peer');
+        mkdirSync(join(peerDir, 'ru'), {recursive: true});
+        writeFileSync(join(peerDir, 'ru/shared.md'), 'shared');
+
+        const out = join(tmp, 'out');
+        await assembleDir(out, tmp, makeParsed({peerDirs: [peerDir]}));
+
+        expect(readFileSync(join(out, 'ru/shared.md'), 'utf8')).toBe('shared');
+    });
+
+    it('copies COPY_FILE to declared destination', async () => {
+        mkdirSync(join(tmp, 'assets'));
+        writeFileSync(join(tmp, 'assets/logo.png'), 'png');
+
+        const out = join(tmp, 'out');
+        const parsed = makeParsed({
+            copyFileSingle: [{src: join(tmp, 'assets/logo.png'), dst: 'ru/logo.png'}],
+        });
+
+        await assembleDir(out, tmp, parsed);
+
+        expect(readFileSync(join(out, 'ru/logo.png'), 'utf8')).toBe('png');
     });
 
     it('recreates assembledDir on each call', async () => {

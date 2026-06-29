@@ -8,11 +8,18 @@ export type CopyFileEntry = {
     files: string[];
 };
 
+export type CopyFileSingleEntry = {
+    src: string;
+    dst: string;
+};
+
 export type YaMakeParsed = {
     arcadiaRoot: string;
     docsDir?: string;
     copyFiles: CopyFileEntry[];
     includeSources: string[];
+    peerDirs: string[];
+    copyFileSingle: CopyFileSingleEntry[];
 };
 
 function resolveFrom(raw: string, arcadiaRoot: string, curDir: string): string {
@@ -66,7 +73,28 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
         }
     }
 
-    return {arcadiaRoot, docsDir, copyFiles, includeSources};
+    const peerDirs: string[] = [];
+    const peerDirRegex = /\bPEERDIR\s*\(([\s\S]*?)\)/g;
+
+    while ((match = peerDirRegex.exec(content)) !== null) {
+        const paths = match[1].trim().split(/\s+/).filter(Boolean);
+
+        for (const p of paths) {
+            peerDirs.push(join(arcadiaRoot, p));
+        }
+    }
+
+    const copyFileSingle: CopyFileSingleEntry[] = [];
+    const copyFileRegex = /\bCOPY_FILE\s*\(\s*(\S+)\s+(\S+)\s*\)/g;
+
+    while ((match = copyFileRegex.exec(content)) !== null) {
+        copyFileSingle.push({
+            src: join(curDir, match[1]),
+            dst: match[2],
+        });
+    }
+
+    return {arcadiaRoot, docsDir, copyFiles, includeSources, peerDirs, copyFileSingle};
 }
 
 export function resolveTarget(
@@ -90,6 +118,17 @@ export function resolveTarget(
         return join(assembledDir, relative(parsed.arcadiaRoot, absPath));
     }
 
+    for (const peerDir of parsed.peerDirs) {
+        if (absPath.startsWith(peerDir + '/')) {
+            return join(assembledDir, relative(peerDir, absPath));
+        }
+    }
+
+    const copyFileSingleEntry = parsed.copyFileSingle.find((e) => e.src === absPath);
+    if (copyFileSingleEntry) {
+        return join(assembledDir, copyFileSingleEntry.dst);
+    }
+
     return null;
 }
 
@@ -103,6 +142,12 @@ export async function assembleDir(
 
     if (parsed.docsDir && existsSync(parsed.docsDir)) {
         await cp(parsed.docsDir, assembledDir, {recursive: true});
+    }
+
+    for (const peerDir of parsed.peerDirs) {
+        if (existsSync(peerDir)) {
+            await cp(peerDir, assembledDir, {recursive: true});
+        }
     }
 
     for (const {from, namespace, files} of parsed.copyFiles) {
@@ -129,6 +174,17 @@ export async function assembleDir(
 
         mkdirSync(dirname(dst), {recursive: true});
         copyFileSync(src, dst);
+    }
+
+    for (const {src, dst} of parsed.copyFileSingle) {
+        if (!existsSync(src)) {
+            continue;
+        }
+
+        const dstPath = join(assembledDir, dst);
+
+        mkdirSync(dirname(dstPath), {recursive: true});
+        copyFileSync(src, dstPath);
     }
 
     const yfmSrc = join(originalInput, '.yfm');
