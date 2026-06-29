@@ -131,53 +131,59 @@ describe('parseYaMake', () => {
 });
 
 describe('resolveTarget', () => {
-    const assembled = '/out/assembled';
+    const assembled = join('/', 'out', 'assembled');
 
     it('maps file inside docsDir', () => {
-        const parsed = makeParsed({docsDir: `${ROOT}/docs/common`});
-        const result = resolveTarget(`${ROOT}/docs/common/ru/index.md`, parsed, assembled);
+        const docsDir = join(ROOT, 'docs/common');
+        const parsed = makeParsed({docsDir});
+        const result = resolveTarget(join(docsDir, 'ru/index.md'), parsed, assembled);
         expect(result).toBe(join(assembled, 'ru/index.md'));
     });
 
     it('maps DOCS_COPY_FILES file to its namespace', () => {
+        const from = join(ROOT, 'devops/ru');
         const parsed = makeParsed({
-            copyFiles: [{from: `${ROOT}/devops/ru`, namespace: 'ru', files: ['feedback.md']}],
+            copyFiles: [{from, namespace: 'ru', files: ['feedback.md']}],
         });
-        const result = resolveTarget(`${ROOT}/devops/ru/feedback.md`, parsed, assembled);
+        const result = resolveTarget(join(from, 'feedback.md'), parsed, assembled);
         expect(result).toBe(join(assembled, 'ru/feedback.md'));
     });
 
     it('maps DOCS_INCLUDE_SOURCES file preserving arcadia-relative path', () => {
-        const parsed = makeParsed({
-            includeSources: [`${ROOT}/src/lib/api.go`],
-        });
-        const result = resolveTarget(`${ROOT}/src/lib/api.go`, parsed, assembled);
+        const src = join(ROOT, 'src/lib/api.go');
+        const parsed = makeParsed({includeSources: [src]});
+        const result = resolveTarget(src, parsed, assembled);
         expect(result).toBe(join(assembled, 'src/lib/api.go'));
     });
 
     it('ignores DOCS_COPY_FILES file not in files list', () => {
+        const from = join(ROOT, 'devops/ru');
         const parsed = makeParsed({
-            copyFiles: [{from: `${ROOT}/devops/ru`, namespace: 'ru', files: ['feedback.md']}],
+            copyFiles: [{from, namespace: 'ru', files: ['feedback.md']}],
         });
-        expect(resolveTarget(`${ROOT}/devops/ru/other.md`, parsed, assembled)).toBeNull();
+        expect(resolveTarget(join(from, 'other.md'), parsed, assembled)).toBeNull();
     });
 
     it('maps PEERDIR file to assembledDir root', () => {
-        const parsed = makeParsed({peerDirs: [`${ROOT}/docs/shared`]});
-        const result = resolveTarget(`${ROOT}/docs/shared/ru/index.md`, parsed, assembled);
+        const peerDir = join(ROOT, 'docs/shared');
+        const parsed = makeParsed({peerDirs: [peerDir]});
+        const result = resolveTarget(join(peerDir, 'ru/index.md'), parsed, assembled);
         expect(result).toBe(join(assembled, 'ru/index.md'));
     });
 
     it('maps COPY_FILE src to its declared dst', () => {
+        const src = join(ROOT, 'assets/logo.png');
         const parsed = makeParsed({
-            copyFileSingle: [{src: `${ROOT}/assets/logo.png`, dst: 'ru/logo.png'}],
+            copyFileSingle: [{src, dst: 'ru/logo.png'}],
         });
-        const result = resolveTarget(`${ROOT}/assets/logo.png`, parsed, assembled);
+        const result = resolveTarget(src, parsed, assembled);
         expect(result).toBe(join(assembled, 'ru/logo.png'));
     });
 
     it('returns null for unrelated path', () => {
-        expect(resolveTarget('/unrelated/file.md', makeParsed(), assembled)).toBeNull();
+        expect(
+            resolveTarget(join('/', 'unrelated', 'file.md'), makeParsed(), assembled),
+        ).toBeNull();
     });
 });
 
