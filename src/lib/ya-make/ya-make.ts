@@ -1,4 +1,4 @@
-import {basename, dirname, join, relative} from 'node:path';
+import {basename, dirname, join, relative, sep} from 'node:path';
 import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync} from 'node:fs';
 import {cp} from 'node:fs/promises';
 
@@ -107,14 +107,14 @@ export function resolveTarget(
     parsed: YaMakeParsed,
     assembledDir: string,
 ): string | null {
-    if (parsed.docsDir && absPath.startsWith(parsed.docsDir + '/')) {
+    if (parsed.docsDir && absPath.startsWith(parsed.docsDir + sep)) {
         return join(assembledDir, relative(parsed.docsDir, absPath));
     }
 
     const fileBase = basename(absPath);
 
     for (const {from, namespace, files} of parsed.copyFiles) {
-        if (absPath.startsWith(from + '/') && files.includes(fileBase)) {
+        if (absPath.startsWith(from + sep) && files.includes(fileBase)) {
             return join(assembledDir, namespace, fileBase);
         }
     }
@@ -124,7 +124,7 @@ export function resolveTarget(
     }
 
     for (const peerDir of parsed.peerDirs) {
-        if (absPath.startsWith(peerDir + '/')) {
+        if (absPath.startsWith(peerDir + sep)) {
             return join(assembledDir, relative(peerDir, absPath));
         }
     }
