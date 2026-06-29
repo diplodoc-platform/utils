@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.1](https://github.com/diplodoc-platform/utils/compare/v2.3.0...v2.3.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* fixed tests ([398f032](https://github.com/diplodoc-platform/utils/commit/398f032e9d59d7e17f9fa10248f534737b81801d))
+* fixed win tests ([1c2307c](https://github.com/diplodoc-platform/utils/commit/1c2307c36980021b71c98db5281dab7a2a117da2))
+
 ## [2.3.0](https://github.com/diplodoc-platform/utils/compare/v2.2.3...v2.3.0) (2026-06-29)
 
 
