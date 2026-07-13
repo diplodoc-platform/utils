@@ -16,13 +16,14 @@ export type CopyFileSingleEntry = {
 export type YaMakeParsed = {
     arcadiaRoot: string;
     docsDir?: string;
+    docsConfig?: string;
     copyFiles: CopyFileEntry[];
     includeSources: string[];
     peerDirs: string[];
     copyFileSingle: CopyFileSingleEntry[];
 };
 
-function resolveFrom(raw: string, arcadiaRoot: string, curDir: string): string {
+function resolveFrom(raw: string, arcadiaRoot: string, curDir: string, docsRoot?: string): string {
     const stripped = raw.replace(/\/$/, '');
 
     if (stripped.startsWith('${ARCADIA_ROOT}')) {
@@ -31,6 +32,10 @@ function resolveFrom(raw: string, arcadiaRoot: string, curDir: string): string {
 
     if (stripped.startsWith('${CURDIR}')) {
         return join(curDir, stripped.slice('${CURDIR}'.length));
+    }
+
+    if (docsRoot && stripped.startsWith('${DOCS_ROOT}')) {
+        return join(docsRoot, stripped.slice('${DOCS_ROOT}'.length));
     }
 
     return stripped;
@@ -46,6 +51,17 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
 
     const docsDirMatch = /DOCS_DIR\s*\(\s*([\w/.:-]+)\s*\)/.exec(content);
     const docsDir = docsDirMatch ? join(arcadiaRoot, docsDirMatch[1]) : undefined;
+    const docsRoot = docsDir ?? curDir;
+
+    const docsConfigMatch = /DOCS_CONFIG\s*\(\s*(\S+)\s*\)/.exec(content);
+    let docsConfig: string | undefined;
+
+    if (docsConfigMatch) {
+        const rawPath = docsConfigMatch[1];
+        docsConfig = rawPath.includes('${')
+            ? resolveFrom(rawPath, arcadiaRoot, curDir, docsRoot)
+            : join(curDir, rawPath);
+    }
 
     const copyFiles: CopyFileEntry[] = [];
     const blockRegex = /DOCS_COPY_FILES\s*\(([\s\S]*?)\)/g;
@@ -99,7 +115,7 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
         copyFileSingle.push({src, dst: match[2]});
     }
 
-    return {arcadiaRoot, docsDir, copyFiles, includeSources, peerDirs, copyFileSingle};
+    return {arcadiaRoot, docsDir, docsConfig, copyFiles, includeSources, peerDirs, copyFileSingle};
 }
 
 export function resolveTarget(
@@ -107,6 +123,10 @@ export function resolveTarget(
     parsed: YaMakeParsed,
     assembledDir: string,
 ): string | null {
+    if (parsed.docsConfig && absPath === parsed.docsConfig) {
+        return join(assembledDir, '.yfm');
+    }
+
     if (parsed.docsDir && absPath.startsWith(parsed.docsDir + sep)) {
         return join(assembledDir, relative(parsed.docsDir, absPath));
     }
@@ -178,5 +198,6 @@ export async function assembleDir(
         copyFileTo(src, join(assembledDir, dst));
     }
 
-    copyFileTo(join(originalInput, '.yfm'), join(assembledDir, '.yfm'));
+    const configSource = parsed.docsConfig ?? join(originalInput, '.yfm');
+    copyFileTo(configSource, join(assembledDir, '.yfm'));
 }
