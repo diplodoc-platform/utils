@@ -12,6 +12,7 @@ const ROOT = '/root';
 const makeParsed = (overrides: Partial<YaMakeParsed> = {}): YaMakeParsed => ({
     arcadiaRoot: ROOT,
     docsDir: undefined,
+    docsConfig: undefined,
     copyFiles: [],
     includeSources: [],
     peerDirs: [],
@@ -123,10 +124,59 @@ describe('parseYaMake', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nEND()');
         const result = parseYaMake(yamakePath, ROOT);
         expect(result.docsDir).toBeUndefined();
+        expect(result.docsConfig).toBeUndefined();
         expect(result.copyFiles).toHaveLength(0);
         expect(result.includeSources).toHaveLength(0);
         expect(result.peerDirs).toHaveLength(0);
         expect(result.copyFileSingle).toHaveLength(0);
+    });
+
+    it('parses DOCS_CONFIG with relative path', () => {
+        writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(.yfm)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(dir, '.yfm'));
+    });
+
+    it('parses DOCS_CONFIG with config.yml', () => {
+        writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(config.yml)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(dir, 'config.yml'));
+    });
+
+    it('resolves ${DOCS_ROOT} in DOCS_CONFIG to curDir when DOCS_DIR is absent', () => {
+        writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(${DOCS_ROOT}/index.yml)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(dir, 'index.yml'));
+    });
+
+    it('resolves ${DOCS_ROOT} in DOCS_CONFIG to docsDir when DOCS_DIR is present', () => {
+        writeFileSync(
+            yamakePath,
+            'DOCS_DIR(docs/project/common)\nDOCS_CONFIG(${DOCS_ROOT}/index.yml)\nEND()',
+        );
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(ROOT, 'docs/project/common', 'index.yml'));
+    });
+
+    it('resolves ${ARCADIA_ROOT} in DOCS_CONFIG', () => {
+        writeFileSync(
+            yamakePath,
+            'DOCS(html)\nDOCS_CONFIG(${ARCADIA_ROOT}/infra/docs/.yfm)\nEND()',
+        );
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(ROOT, 'infra/docs/.yfm'));
+    });
+
+    it('resolves ${CURDIR} in DOCS_CONFIG', () => {
+        writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(${CURDIR}/custom.config)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBe(join(dir, 'custom.config'));
+    });
+
+    it('ignores commented-out DOCS_CONFIG', () => {
+        writeFileSync(yamakePath, '# DOCS_CONFIG(.yfm)\nDOCS(html)\nEND()');
+        const result = parseYaMake(yamakePath, ROOT);
+        expect(result.docsConfig).toBeUndefined();
     });
 });
 
@@ -178,6 +228,13 @@ describe('resolveTarget', () => {
         });
         const result = resolveTarget(src, parsed, assembled);
         expect(result).toBe(join(assembled, 'ru/logo.png'));
+    });
+
+    it('maps DOCS_CONFIG path to .yfm in assembledDir', () => {
+        const configPath = join(ROOT, 'project/docs/config.yml');
+        const parsed = makeParsed({docsConfig: configPath});
+        const result = resolveTarget(configPath, parsed, assembled);
+        expect(result).toBe(join(assembled, '.yfm'));
     });
 
     it('returns null for unrelated path', () => {
@@ -251,6 +308,26 @@ describe('assembleDir', () => {
         await assembleDir(out, tmp, makeParsed({docsDir}));
 
         expect(readFileSync(join(out, '.yfm'), 'utf8')).toBe('from: target');
+    });
+
+    it('copies DOCS_CONFIG file as .yfm to assembledDir', async () => {
+        mkdirSync(join(tmp, 'conf'));
+        writeFileSync(join(tmp, 'conf/config.yml'), 'title: Custom');
+
+        const out = join(tmp, 'out');
+        await assembleDir(out, tmp, makeParsed({docsConfig: join(tmp, 'conf/config.yml')}));
+
+        expect(readFileSync(join(out, '.yfm'), 'utf8')).toBe('title: Custom');
+    });
+
+    it('prefers DOCS_CONFIG over default .yfm from originalInput', async () => {
+        writeFileSync(join(tmp, '.yfm'), 'from: default');
+        writeFileSync(join(tmp, 'custom.config'), 'from: custom');
+
+        const out = join(tmp, 'out');
+        await assembleDir(out, tmp, makeParsed({docsConfig: join(tmp, 'custom.config')}));
+
+        expect(readFileSync(join(out, '.yfm'), 'utf8')).toBe('from: custom');
     });
 
     it('skips missing files without error', async () => {
