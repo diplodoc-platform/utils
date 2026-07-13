@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.2](https://github.com/diplodoc-platform/utils/compare/v2.3.1...v2.3.2) (2026-07-13)
+
+
+### Bug Fixes
+
+* added DOCS_CONFIG support ([dbd3b2d](https://github.com/diplodoc-platform/utils/commit/dbd3b2dfedbe684acb05475e977cf72975771131))
+* fixed sonar ([bf79662](https://github.com/diplodoc-platform/utils/commit/bf79662de13df203d3b894603cf130a7a06633f9))
+
 ## [2.3.1](https://github.com/diplodoc-platform/utils/compare/v2.3.0...v2.3.1) (2026-06-29)
 
 
