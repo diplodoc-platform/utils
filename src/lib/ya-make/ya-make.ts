@@ -41,6 +41,38 @@ function resolveFrom(raw: string, arcadiaRoot: string, curDir: string, docsRoot?
     return stripped;
 }
 
+function parseDocsConfig(
+    content: string,
+    arcadiaRoot: string,
+    curDir: string,
+    docsRoot: string,
+): string | undefined {
+    const match = /DOCS_CONFIG\s*\(\s*(\S+)\s*\)/.exec(content);
+
+    if (!match) {
+        return undefined;
+    }
+
+    const rawPath = match[1];
+
+    return rawPath.includes('${')
+        ? resolveFrom(rawPath, arcadiaRoot, curDir, docsRoot)
+        : join(curDir, rawPath);
+}
+
+function collectPathBlocks(regex: RegExp, content: string, root: string): string[] {
+    const result: string[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = regex.exec(content)) !== null) {
+        for (const p of match[1].trim().split(/\s+/).filter(Boolean)) {
+            result.push(join(root, p));
+        }
+    }
+
+    return result;
+}
+
 export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakeParsed {
     const raw = readFileSync(yamakePath, 'utf8');
     const content = raw
@@ -51,17 +83,7 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
 
     const docsDirMatch = /DOCS_DIR\s*\(\s*([\w/.:-]+)\s*\)/.exec(content);
     const docsDir = docsDirMatch ? join(arcadiaRoot, docsDirMatch[1]) : undefined;
-    const docsRoot = docsDir ?? curDir;
-
-    const docsConfigMatch = /DOCS_CONFIG\s*\(\s*(\S+)\s*\)/.exec(content);
-    let docsConfig: string | undefined;
-
-    if (docsConfigMatch) {
-        const rawPath = docsConfigMatch[1];
-        docsConfig = rawPath.includes('${')
-            ? resolveFrom(rawPath, arcadiaRoot, curDir, docsRoot)
-            : join(curDir, rawPath);
-    }
+    const docsConfig = parseDocsConfig(content, arcadiaRoot, curDir, docsDir ?? curDir);
 
     const copyFiles: CopyFileEntry[] = [];
     const blockRegex = /DOCS_COPY_FILES\s*\(([\s\S]*?)\)/g;
@@ -82,27 +104,13 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
         copyFiles.push({from, namespace, files});
     }
 
-    const includeSources: string[] = [];
-    const includeRegex = /DOCS_INCLUDE_SOURCES\s*\(([\s\S]*?)\)/g;
+    const includeSources = collectPathBlocks(
+        /DOCS_INCLUDE_SOURCES\s*\(([\s\S]*?)\)/g,
+        content,
+        arcadiaRoot,
+    );
 
-    while ((match = includeRegex.exec(content)) !== null) {
-        const paths = match[1].trim().split(/\s+/).filter(Boolean);
-
-        for (const p of paths) {
-            includeSources.push(join(arcadiaRoot, p));
-        }
-    }
-
-    const peerDirs: string[] = [];
-    const peerDirRegex = /\bPEERDIR\s*\(([\s\S]*?)\)/g;
-
-    while ((match = peerDirRegex.exec(content)) !== null) {
-        const paths = match[1].trim().split(/\s+/).filter(Boolean);
-
-        for (const p of paths) {
-            peerDirs.push(join(arcadiaRoot, p));
-        }
-    }
+    const peerDirs = collectPathBlocks(/\bPEERDIR\s*\(([\s\S]*?)\)/g, content, arcadiaRoot);
 
     const copyFileSingle: CopyFileSingleEntry[] = [];
     const copyFileRegex = /\bCOPY_FILE\s*\(\s*(\S+)\s+(\S+)\s*\)/g;
