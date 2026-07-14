@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.3](https://github.com/diplodoc-platform/utils/compare/v2.3.2...v2.3.3) (2026-07-14)
+
+
+### Bug Fixes
+
+* remove node url DOCSTOOLS-6242 ([40a6c31](https://github.com/diplodoc-platform/utils/commit/40a6c315eb5b5fc8169348c951753fd1c620c05b))
+
 ## [2.3.2](https://github.com/diplodoc-platform/utils/compare/v2.3.1...v2.3.2) (2026-07-13)
 
 
