@@ -6,7 +6,7 @@
     "module": "CommonJS",
     "rootDirs": ["src", "test"],
     "outDir": "./",
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": ["src", "test"],
   "exclude": ["node_modules"]
