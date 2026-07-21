@@ -1,5 +1,5 @@
 import {basename, dirname, join, relative, sep} from 'node:path';
-import {copyFileSync, existsSync, mkdirSync, readFileSync, rmSync} from 'node:fs';
+import {copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync} from 'node:fs';
 import {cp} from 'node:fs/promises';
 
 export type CopyFileEntry = {
@@ -60,6 +60,23 @@ function parseDocsConfig(
         : join(curDir, rawPath);
 }
 
+function resolveDocsDir(
+    content: string,
+    arcadiaRoot: string,
+    curDir: string,
+    docsDirMatch: RegExpExecArray | null,
+): string | undefined {
+    if (docsDirMatch) {
+        return join(arcadiaRoot, docsDirMatch[1]);
+    }
+
+    if (/\bDOCS\s*\(/.test(content)) {
+        return curDir;
+    }
+
+    return undefined;
+}
+
 function collectPathBlocks(regex: RegExp, content: string, root: string): string[] {
     const result: string[] = [];
     let match: RegExpExecArray | null;
@@ -82,7 +99,7 @@ export function parseYaMake(yamakePath: string, arcadiaRoot: string): YaMakePars
     const curDir = dirname(yamakePath);
 
     const docsDirMatch = /DOCS_DIR\s*\(\s*([\w/.:-]+)\s*\)/.exec(content);
-    const docsDir = docsDirMatch ? join(arcadiaRoot, docsDirMatch[1]) : undefined;
+    const docsDir = resolveDocsDir(content, arcadiaRoot, curDir, docsDirMatch);
     const docsConfig = parseDocsConfig(content, arcadiaRoot, curDir, docsDir ?? curDir);
 
     const copyFiles: CopyFileEntry[] = [];
@@ -153,7 +170,7 @@ export function resolveTarget(
 
     for (const peerDir of parsed.peerDirs) {
         if (absPath.startsWith(peerDir + sep)) {
-            return join(assembledDir, relative(peerDir, absPath));
+            return join(assembledDir, relative(parsed.arcadiaRoot, absPath));
         }
     }
 
@@ -163,6 +180,18 @@ export function resolveTarget(
     }
 
     return null;
+}
+
+async function copyDirInto(src: string, dst: string, exclude: string): Promise<void> {
+    for (const entry of readdirSync(src)) {
+        const from = join(src, entry);
+
+        if (from === exclude || exclude.startsWith(from + sep)) {
+            continue;
+        }
+
+        await cp(from, join(dst, entry), {recursive: true});
+    }
 }
 
 function copyFileTo(src: string, dst: string): void {
@@ -183,12 +212,14 @@ export async function assembleDir(
     mkdirSync(assembledDir, {recursive: true});
 
     if (parsed.docsDir && existsSync(parsed.docsDir)) {
-        await cp(parsed.docsDir, assembledDir, {recursive: true});
+        await copyDirInto(parsed.docsDir, assembledDir, assembledDir);
     }
 
     for (const peerDir of parsed.peerDirs) {
         if (existsSync(peerDir)) {
-            await cp(peerDir, assembledDir, {recursive: true});
+            await cp(peerDir, join(assembledDir, relative(parsed.arcadiaRoot, peerDir)), {
+                recursive: true,
+            });
         }
     }
 

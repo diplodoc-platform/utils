@@ -36,7 +36,9 @@ describe('parseYaMake', () => {
 
     it('parses DOCS_DIR', () => {
         writeFileSync(yamakePath, 'DOCS_DIR(docs/project/common)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsDir).toBe(join(ROOT, 'docs/project/common'));
     });
 
@@ -62,7 +64,9 @@ describe('parseYaMake', () => {
                 'DOCS_COPY_FILES(FROM ${ARCADIA_ROOT}/b/ NAMESPACE ru/sub b.md c.md)',
             ].join('\n'),
         );
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.copyFiles).toHaveLength(2);
         expect(result.copyFiles[1].files).toEqual(['b.md', 'c.md']);
     });
@@ -78,7 +82,9 @@ describe('parseYaMake', () => {
 
     it('parses DOCS_INCLUDE_SOURCES', () => {
         writeFileSync(yamakePath, 'DOCS_INCLUDE_SOURCES(src/lib/api.go src/lib/types.go)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.includeSources).toEqual([
             join(ROOT, 'src/lib/api.go'),
             join(ROOT, 'src/lib/types.go'),
@@ -87,7 +93,9 @@ describe('parseYaMake', () => {
 
     it('parses PEERDIR', () => {
         writeFileSync(yamakePath, 'PEERDIR(\n    docs/shared/lib\n    docs/common/icons\n)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.peerDirs).toEqual([
             join(ROOT, 'docs/shared/lib'),
             join(ROOT, 'docs/common/icons'),
@@ -96,7 +104,9 @@ describe('parseYaMake', () => {
 
     it('parses COPY_FILE relative to ya.make directory', () => {
         writeFileSync(yamakePath, 'COPY_FILE(assets/logo.png ru/logo.png)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.copyFileSingle).toEqual([
             {src: join(dir, 'assets/logo.png'), dst: 'ru/logo.png'},
         ]);
@@ -107,23 +117,60 @@ describe('parseYaMake', () => {
             yamakePath,
             'COPY_FILE(${ARCADIA_ROOT}/shared/style.css _assets/style.css)\nEND()',
         );
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.copyFileSingle[0].src).toBe(join(ROOT, 'shared/style.css'));
     });
 
-    it('ignores commented-out directives', () => {
+    it('ignores commented-out DOCS_DIR and falls back to ya.make directory', () => {
         writeFileSync(
             yamakePath,
             '# DOCS_DIR(docs/should/be/ignored)\n## section\nDOCS(html)\nEND()',
         );
+
         const result = parseYaMake(yamakePath, ROOT);
+
+        expect(result.docsDir).toBe(dir);
+    });
+
+    it('defaults docsDir to the ya.make directory for bare DOCS()', () => {
+        writeFileSync(yamakePath, 'DOCS()\nEND()');
+
+        const result = parseYaMake(yamakePath, ROOT);
+
+        expect(result.docsDir).toBe(dir);
+    });
+
+    it('defaults docsDir to the ya.make directory for DOCS(name)', () => {
+        writeFileSync(yamakePath, 'DOCS(docs)\nEND()');
+
+        const result = parseYaMake(yamakePath, ROOT);
+
+        expect(result.docsDir).toBe(dir);
+    });
+
+    it('prefers DOCS_DIR over the ya.make directory', () => {
+        writeFileSync(yamakePath, 'DOCS()\nDOCS_DIR(docs/project/common)\nEND()');
+
+        const result = parseYaMake(yamakePath, ROOT);
+
+        expect(result.docsDir).toBe(join(ROOT, 'docs/project/common'));
+    });
+
+    it('leaves docsDir undefined when no DOCS module is declared', () => {
+        writeFileSync(yamakePath, 'LIBRARY()\nEND()');
+
+        const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsDir).toBeUndefined();
     });
 
     it('returns empty collections when macros are absent', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
-        expect(result.docsDir).toBeUndefined();
+
         expect(result.docsConfig).toBeUndefined();
         expect(result.copyFiles).toHaveLength(0);
         expect(result.includeSources).toHaveLength(0);
@@ -133,19 +180,25 @@ describe('parseYaMake', () => {
 
     it('parses DOCS_CONFIG with relative path', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(.yfm)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(dir, '.yfm'));
     });
 
     it('parses DOCS_CONFIG with config.yml', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(config.yml)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(dir, 'config.yml'));
     });
 
     it('resolves ${DOCS_ROOT} in DOCS_CONFIG to curDir when DOCS_DIR is absent', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(${DOCS_ROOT}/index.yml)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(dir, 'index.yml'));
     });
 
@@ -154,7 +207,9 @@ describe('parseYaMake', () => {
             yamakePath,
             'DOCS_DIR(docs/project/common)\nDOCS_CONFIG(${DOCS_ROOT}/index.yml)\nEND()',
         );
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(ROOT, 'docs/project/common', 'index.yml'));
     });
 
@@ -163,19 +218,25 @@ describe('parseYaMake', () => {
             yamakePath,
             'DOCS(html)\nDOCS_CONFIG(${ARCADIA_ROOT}/infra/docs/.yfm)\nEND()',
         );
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(ROOT, 'infra/docs/.yfm'));
     });
 
     it('resolves ${CURDIR} in DOCS_CONFIG', () => {
         writeFileSync(yamakePath, 'DOCS(html)\nDOCS_CONFIG(${CURDIR}/custom.config)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBe(join(dir, 'custom.config'));
     });
 
     it('ignores commented-out DOCS_CONFIG', () => {
         writeFileSync(yamakePath, '# DOCS_CONFIG(.yfm)\nDOCS(html)\nEND()');
+
         const result = parseYaMake(yamakePath, ROOT);
+
         expect(result.docsConfig).toBeUndefined();
     });
 });
@@ -187,6 +248,7 @@ describe('resolveTarget', () => {
         const docsDir = join(ROOT, 'docs/common');
         const parsed = makeParsed({docsDir});
         const result = resolveTarget(join(docsDir, 'ru/index.md'), parsed, assembled);
+
         expect(result).toBe(join(assembled, 'ru/index.md'));
     });
 
@@ -196,6 +258,7 @@ describe('resolveTarget', () => {
             copyFiles: [{from, namespace: 'ru', files: ['feedback.md']}],
         });
         const result = resolveTarget(join(from, 'feedback.md'), parsed, assembled);
+
         expect(result).toBe(join(assembled, 'ru/feedback.md'));
     });
 
@@ -203,6 +266,7 @@ describe('resolveTarget', () => {
         const src = join(ROOT, 'src/lib/api.go');
         const parsed = makeParsed({includeSources: [src]});
         const result = resolveTarget(src, parsed, assembled);
+
         expect(result).toBe(join(assembled, 'src/lib/api.go'));
     });
 
@@ -211,14 +275,16 @@ describe('resolveTarget', () => {
         const parsed = makeParsed({
             copyFiles: [{from, namespace: 'ru', files: ['feedback.md']}],
         });
+
         expect(resolveTarget(join(from, 'other.md'), parsed, assembled)).toBeNull();
     });
 
-    it('maps PEERDIR file to assembledDir root', () => {
-        const peerDir = join(ROOT, 'docs/shared');
+    it('maps PEERDIR file preserving arcadia-relative path', () => {
+        const peerDir = join(ROOT, 'ai/tools/aisuite/doc');
         const parsed = makeParsed({peerDirs: [peerDir]});
-        const result = resolveTarget(join(peerDir, 'ru/index.md'), parsed, assembled);
-        expect(result).toBe(join(assembled, 'ru/index.md'));
+        const result = resolveTarget(join(peerDir, 'agents/overview.md'), parsed, assembled);
+
+        expect(result).toBe(join(assembled, 'ai/tools/aisuite/doc/agents/overview.md'));
     });
 
     it('maps COPY_FILE src to its declared dst', () => {
@@ -227,6 +293,7 @@ describe('resolveTarget', () => {
             copyFileSingle: [{src, dst: 'ru/logo.png'}],
         });
         const result = resolveTarget(src, parsed, assembled);
+
         expect(result).toBe(join(assembled, 'ru/logo.png'));
     });
 
@@ -234,6 +301,7 @@ describe('resolveTarget', () => {
         const configPath = join(ROOT, 'project/docs/config.yml');
         const parsed = makeParsed({docsConfig: configPath});
         const result = resolveTarget(configPath, parsed, assembled);
+
         expect(result).toBe(join(assembled, '.yfm'));
     });
 
@@ -341,15 +409,19 @@ describe('assembleDir', () => {
         expect(existsSync(join(out, 'ru/missing.md'))).toBe(false);
     });
 
-    it('merges PEERDIR contents into assembledDir root', async () => {
-        const peerDir = join(tmp, 'peer');
-        mkdirSync(join(peerDir, 'ru'), {recursive: true});
-        writeFileSync(join(peerDir, 'ru/shared.md'), 'shared');
+    it('places PEERDIR contents under their arcadia-relative path', async () => {
+        const arcadia = join(tmp, 'arcadia');
+        const peerDir = join(arcadia, 'ai/tools/aisuite/doc');
+
+        mkdirSync(peerDir, {recursive: true});
+        writeFileSync(join(peerDir, 'toc.yaml'), 'title: AISuite');
 
         const out = join(tmp, 'out');
-        await assembleDir(out, tmp, makeParsed({peerDirs: [peerDir]}));
+        await assembleDir(out, tmp, makeParsed({arcadiaRoot: arcadia, peerDirs: [peerDir]}));
 
-        expect(readFileSync(join(out, 'ru/shared.md'), 'utf8')).toBe('shared');
+        expect(readFileSync(join(out, 'ai/tools/aisuite/doc/toc.yaml'), 'utf8')).toBe(
+            'title: AISuite',
+        );
     });
 
     it('copies COPY_FILE to declared destination', async () => {
@@ -364,6 +436,21 @@ describe('assembleDir', () => {
         await assembleDir(out, tmp, parsed);
 
         expect(readFileSync(join(out, 'ru/logo.png'), 'utf8')).toBe('png');
+    });
+
+    it('copies docsDir without recursing into an assembledDir nested inside it', async () => {
+        const docsDir = join(tmp, 'proj');
+
+        mkdirSync(join(docsDir, 'sub'), {recursive: true});
+        writeFileSync(join(docsDir, 'index.md'), '# Index');
+        writeFileSync(join(docsDir, 'sub/page.md'), 'page');
+
+        const out = join(docsDir, 'build/.ya-make-input');
+        await assembleDir(out, docsDir, makeParsed({docsDir}));
+
+        expect(readFileSync(join(out, 'index.md'), 'utf8')).toBe('# Index');
+        expect(readFileSync(join(out, 'sub/page.md'), 'utf8')).toBe('page');
+        expect(existsSync(join(out, 'build'))).toBe(false);
     });
 
     it('recreates assembledDir on each call', async () => {
