@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.4](https://github.com/diplodoc-platform/utils/compare/v2.3.3...v2.3.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* update react ([9e5f7ae](https://github.com/diplodoc-platform/utils/commit/9e5f7aea389cce760f35219ca8e0a1a0eff76f6b))
+
 ## [2.3.3](https://github.com/diplodoc-platform/utils/compare/v2.3.2...v2.3.3) (2026-07-14)
 
 
