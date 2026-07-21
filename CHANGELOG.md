@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.5](https://github.com/diplodoc-platform/utils/compare/v2.3.4...v2.3.5) (2026-07-21)
+
+
+### Bug Fixes
+
+* fixed PEERDIR and DOCS macros ([6d145b3](https://github.com/diplodoc-platform/utils/commit/6d145b3a5f32b669850340299036f09b0f72f98c))
+
 ## [2.3.4](https://github.com/diplodoc-platform/utils/compare/v2.3.3...v2.3.4) (2026-07-21)
 
 
