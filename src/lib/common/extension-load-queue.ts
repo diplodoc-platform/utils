@@ -199,7 +199,12 @@ export const createLoadQueue = <T>({
 
 declare global {
     interface Window {
-        [key: symbol]: ScriptStore<unknown>;
+        // Deliberately wide: this signature is global, and any package may put its own
+        // symbol on window with its own type. Narrowing it to ScriptStore would demand
+        // that of everyone at once — TypeScript 7 reports such a mismatch (TS2411),
+        // while 5.9.3 accepted it silently. The store's own type comes from the cast in
+        // getScriptStore, not from this signature.
+        [key: symbol]: unknown;
         [QUEUES_SYMBOL]: Record<symbol, boolean>;
     }
 }
