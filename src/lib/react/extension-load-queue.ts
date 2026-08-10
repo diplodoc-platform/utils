@@ -1,4 +1,4 @@
-import type {ScriptStore} from '../common';
+import type {ScriptStore} from '../common/extension-load-queue';
 
 import {useEffect, useState} from 'react';
 
