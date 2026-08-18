@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.7](https://github.com/diplodoc-platform/utils/compare/v2.3.6...v2.3.7) (2026-08-18)
+
+
+### Bug Fixes
+
+* import ScriptScore to apply TS 6 ([523fcf5](https://github.com/diplodoc-platform/utils/commit/523fcf5a8ccd897ce6b082bbe253c71d6084ed46))
+
 ## [2.3.6](https://github.com/diplodoc-platform/utils/compare/v2.3.5...v2.3.6) (2026-08-06)
 
 
