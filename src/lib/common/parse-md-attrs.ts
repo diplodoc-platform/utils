@@ -1,4 +1,4 @@
-import type MarkdownIt from 'markdown-it';
+import type {MarkdownIt} from './markdown-it-types';
 
 // forked from https://github.com/hilookas/markdown-it-directive/blob/ebfb54ef1bf9174990dae74222bc6e0f574e2aa4/index.js#L104
 // added support for attrs without value, for example: {data-is-active}

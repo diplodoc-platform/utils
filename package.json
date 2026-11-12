@@ -1,6 +1,6 @@
 {
   "name": "@diplodoc/utils",
-  "version": "2.3.6",
+  "version": "3.0.0-beta.2",
   "description": "Diplodoc cross-packages utils",
   "homepage": "https://github.com/diplodoc-platform/utils",
   "repository": {
@@ -41,6 +41,7 @@
   ],
   "scripts": {
     "test": "vitest run",
+    "test:package": "node test/markdown-it-types-package.mjs",
     "test:watch": "vitest",
     "build": "npm run build:clean && run-p build:code build:esm build:cjs",
     "build:code": "node esbuild/bundle.mjs",
@@ -79,5 +80,9 @@
     "react": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "tag": "transform5",
+    "access": "public"
   }
 }

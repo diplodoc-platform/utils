@@ -82,13 +82,13 @@ export interface CreateLoadQueueArgs<T> {
 export const getScriptStore = <T>(storeKey: symbol): ScriptStore<T> => {
     if (isBrowser()) {
         // Initialize the store if it does not exist or check that it is an array
-        if (!window[storeKey]) {
-            window[storeKey] = [];
-        } else if (!Array.isArray(window[storeKey])) {
+        if (!(window as unknown as Record<symbol, unknown>)[storeKey]) {
+            (window as unknown as Record<symbol, unknown>)[storeKey] = [];
+        } else if (!Array.isArray((window as unknown as Record<symbol, unknown>)[storeKey])) {
             throw new Error(`Expected window[${String(storeKey)}] to be an array`);
         }
 
-        return window[storeKey] as ScriptStore<T>;
+        return (window as unknown as Record<symbol, unknown>)[storeKey] as ScriptStore<T>;
     } else {
         throw new Error('Cannot initialize QueueStore in a non-browser environment.');
     }
@@ -199,12 +199,6 @@ export const createLoadQueue = <T>({
 
 declare global {
     interface Window {
-        // Deliberately wide: this signature is global, and any package may put its own
-        // symbol on window with its own type. Narrowing it to ScriptStore would demand
-        // that of everyone at once — TypeScript 7 reports such a mismatch (TS2411),
-        // while 5.9.3 accepted it silently. The store's own type comes from the cast in
-        // getScriptStore, not from this signature.
-        [key: symbol]: unknown;
         [QUEUES_SYMBOL]: Record<symbol, boolean>;
     }
 }
