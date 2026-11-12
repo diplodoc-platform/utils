@@ -14,10 +14,10 @@ Diplodoc cross-packages utils.
 Install the Transform 5 prerelease explicitly:
 
 ```sh
-npm install @diplodoc/utils@3.0.0-beta.1
+npm install @diplodoc/utils@3.0.0-beta.2
 ```
 
-This prerelease provides finite parser and token contracts compatible with Markdown-it 13 and 15. It is distributed under the `transform5` npm tag.
+This prerelease provides finite parser and token contracts compatible with Markdown-it 13 and 15. It avoids a broad global `Window` symbol index so strict consumers can install Utils 2 and 3 together. It is distributed under the `transform5` npm tag.
 
 ## Motivation 
 
