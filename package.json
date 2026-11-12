@@ -80,5 +80,9 @@
     "react": {
       "optional": true
     }
+  },
+  "publishConfig": {
+    "tag": "transform5",
+    "access": "public"
   }
 }
