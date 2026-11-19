@@ -9,6 +9,10 @@
 
 Diplodoc cross-packages utils.
 
+## Markdown-it compatibility
+
+Utils 3 supports Markdown-it 13 and 15 in its public parser utility declarations. The queue APIs preserve typed access to the window store when Utils 2 and 3 coexist. See the [declaration compatibility guide](docs/markdown-it-type-compatibility.md) for details.
+
 ## Motivation 
 
 The Diplodoc ecosystem consists of many packages that have similar problems and needs. This package will contain all the general logic that is duplicated in our code base.
