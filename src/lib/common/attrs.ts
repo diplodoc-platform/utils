@@ -1,4 +1,4 @@
-import type Token from 'markdown-it/lib/token';
+import type {Token} from './markdown-it-types';
 
 type Attrs = 'class' | 'id' | 'attr';
 
