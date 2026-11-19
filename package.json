@@ -41,6 +41,7 @@
   ],
   "scripts": {
     "test": "vitest run",
+    "test:package": "node test/markdown-it-types-package.mjs",
     "test:watch": "vitest",
     "build": "npm run build:clean && run-p build:code build:esm build:cjs",
     "build:code": "node esbuild/bundle.mjs",
