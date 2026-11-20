@@ -1,14 +1,6 @@
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
-import {
-    cpSync,
-    existsSync,
-    mkdirSync,
-    mkdtempSync,
-    readFileSync,
-    rmSync,
-    writeFileSync,
-} from 'node:fs';
+import {cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
@@ -61,78 +53,99 @@ try {
     );
     const tarball = join(temporaryRoot, packed.filename);
 
-    for (const version of ['13.0.2', '15.0.3']) {
-        const consumerRoot = join(temporaryRoot, `markdown-it-${version}`);
-        mkdirSync(consumerRoot);
-        const dependencies = {
-            '@diplodoc/utils': `file:${tarball}`,
-            'markdown-it': version,
-            '@types/node': nodeTypesVersion,
-            ...(version.startsWith('13.') ? {'@types/markdown-it': '13.0.9'} : {}),
-        };
-        writeFileSync(
-            join(consumerRoot, 'package.json'),
-            JSON.stringify({private: true, dependencies}, null, 2),
-        );
-        execFileSync(npm, ['install', '--ignore-scripts', '--no-audit', '--no-fund'], {
-            cwd: consumerRoot,
-            env,
-            stdio: 'inherit',
-        });
-        const installedVersion = JSON.parse(
-            readFileSync(join(consumerRoot, 'node_modules/markdown-it/package.json')),
-        ).version;
-        assert.equal(installedVersion, version);
-        if (version.startsWith('15.')) {
-            assert.equal(existsSync(join(consumerRoot, 'node_modules/@types/markdown-it')), false);
-        }
+    const consumerRoot = join(temporaryRoot, 'pnpm-mixed-hosts');
+    const legacyRoot = join(consumerRoot, 'legacy-markdown-owner');
+    mkdirSync(legacyRoot, {recursive: true});
+    writeFileSync(
+        join(legacyRoot, 'package.json'),
+        JSON.stringify({
+            name: 'legacy-markdown-owner',
+            version: '1.0.0',
+            dependencies: {'markdown-it': '13.0.2', '@types/markdown-it': '13.0.9'},
+        }),
+    );
+    const dependencies = {
+        '@diplodoc/utils': `file:${tarball}`,
+        'markdown-it': '15.0.3',
+        '@types/node': nodeTypesVersion,
+        'legacy-markdown-owner': 'file:./legacy-markdown-owner',
+    };
+    writeFileSync(
+        join(consumerRoot, 'package.json'),
+        JSON.stringify({private: true, dependencies}, null, 2),
+    );
+    execFileSync(
+        npm,
+        [
+            'exec',
+            '--yes',
+            '--package=pnpm@10.19.0',
+            '--',
+            'pnpm',
+            'install',
+            '--ignore-scripts',
+            '--strict-peer-dependencies',
+            '--store-dir',
+            join(temporaryRoot, 'pnpm-store'),
+        ],
+        {cwd: consumerRoot, env, stdio: 'inherit'},
+    );
+    const consumerRequire = createRequire(join(consumerRoot, 'package.json'));
+    const utilsEntry = consumerRequire.resolve('@diplodoc/utils');
+    const utilsRequire = createRequire(utilsEntry);
+    const utilsManifest = JSON.parse(
+        readFileSync(join(dirname(utilsEntry), '../../../package.json')),
+    );
+    const legacyRequire = createRequire(
+        consumerRequire.resolve('legacy-markdown-owner/package.json'),
+    );
+    assert.equal(utilsManifest.peerDependencies['markdown-it'], '^15.0.3');
+    assert.equal(utilsRequire('markdown-it/package.json').version, '15.0.3');
+    assert.equal(legacyRequire('markdown-it/package.json').version, '13.0.2');
+    assert.equal(legacyRequire('@types/markdown-it/package.json').version, '13.0.9');
 
-        writeFileSync(
-            join(consumerRoot, 'consumer.cts'),
-            `import type MarkdownItConstructor from 'markdown-it' with {'resolution-mode': 'import'};
+    writeFileSync(
+        join(consumerRoot, 'consumer.cts'),
+        `import type MarkdownItConstructor from 'markdown-it' with {'resolution-mode': 'import'};
 import utils = require('@diplodoc/utils');
 const MarkdownIt: typeof MarkdownItConstructor = require('markdown-it');
 ${consumerBody}`,
-        );
-        writeFileSync(
-            join(consumerRoot, 'consumer.mts'),
-            `import MarkdownIt from 'markdown-it';
+    );
+    writeFileSync(
+        join(consumerRoot, 'consumer.mts'),
+        `import MarkdownIt from 'markdown-it';
 import utils from '@diplodoc/utils';
 ${consumerBody}`,
-        );
-        writeFileSync(
-            join(consumerRoot, 'tsconfig.json'),
-            JSON.stringify({
-                compilerOptions: {
-                    strict: true,
-                    skipLibCheck: false,
-                    esModuleInterop: true,
-                    target: 'ES2022',
-                    module: 'Node16',
-                    moduleResolution: 'Node16',
-                    types: ['node'],
-                    outDir: './compiled',
-                },
-                files: ['consumer.cts', 'consumer.mts'],
-            }),
-        );
-        execFileSync(
-            process.execPath,
-            [require.resolve('typescript/bin/tsc'), '-p', consumerRoot],
-            {
-                cwd: consumerRoot,
-                stdio: 'inherit',
+    );
+    writeFileSync(
+        join(consumerRoot, 'tsconfig.json'),
+        JSON.stringify({
+            compilerOptions: {
+                strict: true,
+                skipLibCheck: false,
+                esModuleInterop: true,
+                target: 'ES2022',
+                module: 'Node16',
+                moduleResolution: 'Node16',
+                types: ['node'],
+                outDir: './compiled',
             },
-        );
-        for (const extension of ['cjs', 'mjs']) {
-            execFileSync(process.execPath, [join(consumerRoot, `compiled/consumer.${extension}`)], {
-                cwd: consumerRoot,
-                stdio: 'inherit',
-            });
-        }
-        // eslint-disable-next-line no-console
-        console.log(`Markdown-it ${version}: strict .cts/.mts declarations and runtime passed.`);
+            files: ['consumer.cts', 'consumer.mts'],
+        }),
+    );
+    execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '-p', consumerRoot], {
+        cwd: consumerRoot,
+        stdio: 'inherit',
+    });
+    for (const extension of ['cjs', 'mjs']) {
+        execFileSync(process.execPath, [join(consumerRoot, `compiled/consumer.${extension}`)], {
+            cwd: consumerRoot,
+            stdio: 'inherit',
+        });
     }
+    // eslint-disable-next-line no-console
+    console.log('pnpm with Markdown-it 15 and a legacy 13 dependency: strict .cts/.mts passed.');
+
     // Keep the legacy root host on Markdown-it 13 and give the modern owner its own native 15 host.
     const candidate = JSON.parse(readFileSync(join(projectRoot, 'package.json')));
     let mixedTarball = tarball;
