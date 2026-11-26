@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.0.0](https://github.com/diplodoc-platform/utils/compare/v2.3.7...v3.0.0) (2026-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* declare Markdown-it 15 as a peer dependency
+* Utils no longer augments Window with an index signature for arbitrary symbol keys. Consumers can declare their own keys and retain typed access through the queue API.
+
+### Bug Fixes
+
+* declare Markdown-it 15 as a peer dependency ([2c87c9b](https://github.com/diplodoc-platform/utils/commit/2c87c9b9036c0051142dca94ea4f957595656a60))
+* support mixed Markdown-it host declarations ([e68fd85](https://github.com/diplodoc-platform/utils/commit/e68fd85a537f81aa92b81fb60881dbb5bee06fb6))
+
 ## [2.3.7](https://github.com/diplodoc-platform/utils/compare/v2.3.6...v2.3.7) (2026-11-26)
 
 
